@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "../components/layout/Header";
-import Sidebar from "../components/layout/Sidebar";
+import LayoutWrapper from "../components/layout/LayoutWrapper";
+import { ReactNode } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,19 +19,11 @@ export const metadata: Metadata = {
   description: "App de gestión creada con Next.js + TailwindCSS",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
-      <body className={`${geistSans.variable} ${geistMono.variable} flex`}>
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-1 p-6 bg-gray-50">{children}</main>
-        </div>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );
