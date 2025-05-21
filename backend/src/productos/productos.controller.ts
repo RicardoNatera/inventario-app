@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ProductosService } from './productos.service';
 import { Producto } from '@prisma/client';
-//aa
+
 @Controller('productos')
 export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
