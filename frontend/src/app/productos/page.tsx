@@ -1,25 +1,30 @@
 "use client";
 
-import { useState } from "react";
-
-interface Producto {
-  id: number;
-  nombre: string;
-  precio: number;
-  stock: number;
-}
-
-const productosIniciales: Producto[] = [
-  { id: 1, nombre: "Laptop", precio: 1200, stock: 5 },
-  { id: 2, nombre: "Mouse", precio: 20, stock: 50 },
-  { id: 3, nombre: "Teclado", precio: 35, stock: 30 },
-  { id: 4, nombre: "Monitor", precio: 200, stock: 15 },
-];
+import { useState,useEffect } from "react";
+import { obtenerProductos } from "@/lib/api";
+import { crearProducto } from "@/lib/api";
+import { eliminarProducto } from "@/lib/api";
+import { editarProducto } from "@/lib/api";
+import { Producto } from "@/interfaces/producto";
 
 export default function ProductosPage() {
   const [filtro, setFiltro] = useState("");
   const [ordenAscendente, setOrdenAscendente] = useState(true);
-  const [productos, setProductos] = useState(productosIniciales);
+  const [productos, setProductos] = useState<Producto[]>([]);
+
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        const { data } = await obtenerProductos();
+        setProductos(data);
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+        alert("Error al cargar productos.");
+      }
+    };
+
+    fetchProductos();
+  }, []);
 
   // Estados para crear nuevo producto
   const [nuevo, setNuevo] = useState({ nombre: "", precio: 0, stock: 0 });
@@ -39,21 +44,40 @@ export default function ProductosPage() {
   const toggleOrden = () => setOrdenAscendente(!ordenAscendente);
 
   // Crear
-  const handleCrear = (e: React.FormEvent) => {
+  const handleCrear = async (e: React.FormEvent) => {
     e.preventDefault();
-    const nuevoProducto: Producto = {
-      id: Date.now(),
-      ...nuevo
-    };
-    setProductos([nuevoProducto, ...productos]);
-    setNuevo({ nombre: "", precio: 0, stock: 0 });
-    setMostrarFormCrear(false);
+
+    try {
+      const { data: creado } = await crearProducto(nuevo);
+      setProductos([creado, ...productos]); // agrega a la lista
+      setNuevo({ nombre: "", precio: 0, stock: 0 });
+      setMostrarFormCrear(false);
+      alert("✅ Producto creado con éxito");
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        alert("⚠️ " + error.response.data.message); // mensaje del backend
+      } else {
+        console.error(error);
+        alert("❌ Error al crear producto.");
+      }
+    }
   };
 
+
   // Eliminar
-  const handleEliminar = (id: number) => {
-    setProductos(productos.filter(p => p.id !== id));
+  const handleEliminar = async (id: number) => {
+    if (!confirm("¿Estás seguro de eliminar este producto?")) return;
+
+    try {
+      await eliminarProducto(id);
+      setProductos(productos.filter((p) => p.id !== id));
+      alert("🗑️ Producto eliminado con éxito");
+    } catch (error) {
+      console.error(error);
+      alert("❌ Error al eliminar el producto");
+    }
   };
+
 
   // Preparar edición
   const iniciarEdicion = (p: Producto) => {
@@ -62,14 +86,25 @@ export default function ProductosPage() {
   };
 
   // Guardar edición
-  const handleEditar = (e: React.FormEvent) => {
+  const handleEditar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editandoId === null) return;
-    setProductos(productos.map(p =>
-      p.id === editandoId ? { id: p.id, ...datosEdicion } : p
-    ));
-    setEditandoId(null);
+
+    try {
+      const { data: actualizado } = await editarProducto(editandoId, datosEdicion);
+      setProductos(productos.map(p => p.id === editandoId ? actualizado : p));
+      setEditandoId(null);
+      alert("✏️ Producto actualizado con éxito");
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        alert("⚠️ " + error.response.data.message);
+      } else {
+        console.error(error);
+        alert("❌ Error al editar producto");
+      }
+    }
   };
+
 
   return (
     <div className="space-y-6">
