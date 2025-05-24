@@ -6,13 +6,24 @@ import { crearProducto } from "@/lib/api";
 import { eliminarProducto } from "@/lib/api";
 import { editarProducto } from "@/lib/api";
 import { Producto } from "@/interfaces/producto";
+import { useRouter } from "next/navigation";
 
 export default function ProductosPage() {
+  const router = useRouter();
+
   const [filtro, setFiltro] = useState("");
   const [ordenAscendente, setOrdenAscendente] = useState(true);
   const [productos, setProductos] = useState<Producto[]>([]);
 
+  
   useEffect(() => {
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
     const fetchProductos = async () => {
       try {
         const { data } = await obtenerProductos();
@@ -24,7 +35,7 @@ export default function ProductosPage() {
     };
 
     fetchProductos();
-  }, []);
+  }, [router]);
 
   // Estados para crear nuevo producto
   const [nuevo, setNuevo] = useState({ nombre: "", precio: 0, stock: 0 });
