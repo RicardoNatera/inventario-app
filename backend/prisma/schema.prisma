@@ -19,3 +19,11 @@ model Producto {
   precio Float
   stock  Int
 }
+
+model Usuario {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  nombre   String
+  creadoEn DateTime @default(now())
+}
