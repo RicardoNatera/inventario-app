@@ -4,17 +4,19 @@ import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import AuthGuard from "../auth/AuthGuard";
+import { SidebarProvider } from "@/context/SidebarContext";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLogin = pathname === "/login";
+  const mostrarLayout = !["/login", "/register"].includes(pathname);
 
-  if (isLogin) {
+  if (!mostrarLayout) {
     return <>{children}</>; // no mostrar Header ni Sidebar en login
   }
 
   return (
     <div className="flex">
+      <SidebarProvider>
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header />
@@ -22,6 +24,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           <main className="flex-1 p-6 bg-gray-50">{children}</main>
         </AuthGuard>
       </div>
+      </SidebarProvider>
     </div>
   );
 }
