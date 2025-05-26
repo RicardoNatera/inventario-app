@@ -23,8 +23,9 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Bienvenido{usuario?.nombre && `, ${usuario.nombre}`} 👋</h1>
-
+      <h1 className="text-2xl font-bold">
+        Bienvenido{usuario?.nombre && `, ${usuario.nombre}`} ({usuario?.rol})
+      </h1>
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white shadow rounded p-4">
           <h2 className="text-gray-600">Total de productos</h2>

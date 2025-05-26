@@ -21,9 +21,15 @@ model Producto {
 }
 
 model Usuario {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  password String
-  nombre   String
-  creadoEn DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  nombre    String
+  rol       Rol      @default(USER)
+  creadoEn  DateTime @default(now())
+}
+
+enum Rol {
+  ADMIN
+  USER
 }

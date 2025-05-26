@@ -7,6 +7,7 @@ import { eliminarProducto } from "@/lib/api";
 import { editarProducto } from "@/lib/api";
 import { Producto } from "@/interfaces/producto";
 import { useRouter } from "next/navigation";
+import { getUsuarioDesdeToken } from "@/lib/auth";
 
 export default function ProductosPage() {
   const router = useRouter();
@@ -14,6 +15,9 @@ export default function ProductosPage() {
   const [filtro, setFiltro] = useState("");
   const [ordenAscendente, setOrdenAscendente] = useState(true);
   const [productos, setProductos] = useState<Producto[]>([]);
+
+  const usuario = getUsuarioDesdeToken();
+  const esAdmin = usuario?.rol === "ADMIN";
 
   
   useEffect(() => {
@@ -136,7 +140,7 @@ export default function ProductosPage() {
         >
           Ordenar por precio ({ordenAscendente ? "Asc" : "Desc"})
         </button>
-        <button
+        {esAdmin && (<button
           onClick={() => {
             setMostrarFormCrear(!mostrarFormCrear);
             setEditandoId(null);
@@ -144,7 +148,7 @@ export default function ProductosPage() {
           className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
         >
           {mostrarFormCrear ? "Cancelar creación" : "Agregar producto"}
-        </button>
+        </button>)}
       </div>
 
       {/* Formulario Crear */}
@@ -193,7 +197,7 @@ export default function ProductosPage() {
             <th className="px-4 py-2">Nombre</th>
             <th className="px-4 py-2">Precio</th>
             <th className="px-4 py-2">Stock</th>
-            <th className="px-4 py-2">Acciones</th>
+            {esAdmin && (<><th className="px-4 py-2">Acciones</th></>)}
           </tr>
         </thead>
         <tbody>
@@ -202,7 +206,8 @@ export default function ProductosPage() {
               <td className="px-4 py-2">{p.nombre}</td>
               <td className="px-4 py-2">${p.precio}</td>
               <td className="px-4 py-2">{p.stock}</td>
-              <td className="px-4 py-2 space-x-2">
+              {esAdmin && (<><td className="px-4 py-2 space-x-2">
+                
                 <button
                   onClick={() => iniciarEdicion(p)}
                   className="bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500"
@@ -215,7 +220,8 @@ export default function ProductosPage() {
                 >
                   Eliminar
                 </button>
-              </td>
+                
+              </td></>)}
             </tr>
           ))}
         </tbody>
