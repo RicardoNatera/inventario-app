@@ -4,6 +4,19 @@ import { useEffect, useState } from "react";
 import { obtenerProductos } from "@/lib/api";
 import { Producto } from "@/interfaces/producto";
 import { getUsuarioDesdeToken } from "@/lib/auth";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 
 export default function HomePage() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -20,6 +33,16 @@ export default function HomePage() {
   const total = productos.length;
   const enOferta = productos.filter(p => p.precio < 20).length;
   const stockTotal = productos.reduce((acc, p) => acc + p.stock, 0);
+
+  const totalEnOferta = productos.filter(p => p.precio < 20).length;
+  const totalNormales = productos.length - totalEnOferta;
+
+  const dataTorta = [
+    { name: "En oferta", value: totalEnOferta },
+    { name: "Precio normal", value: totalNormales },
+  ];
+
+  const colores = ["#f43f5e", "#10b981"]; // rojo para oferta, verde para normales
 
   return (
     <div className="space-y-6">
@@ -72,6 +95,44 @@ export default function HomePage() {
             </tbody>
           </table>
         )}
+      </section>
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold mb-4">Productos con más stock</h2>
+        <div className="bg-white p-4 rounded shadow">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={productos.slice(0, 8).sort((a, b) => b.stock - a.stock)}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="nombre" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="stock" fill="#3b82f6" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold mb-4">Distribución de productos en oferta</h2>
+        <div className="bg-white p-4 rounded shadow">
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={dataTorta}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label
+              >
+                {dataTorta.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colores[index % colores.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </section>
 
     </div>
