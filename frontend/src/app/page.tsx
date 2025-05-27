@@ -17,6 +17,8 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import EstadisticaCard from "@/components/EstadisticaCard";
+import { Boxes, PercentCircle, Layers } from "lucide-react";
 
 export default function HomePage() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -46,23 +48,30 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
+      
       <h1 className="text-2xl font-bold">
         Bienvenido{usuario?.nombre && `, ${usuario.nombre}`} ({usuario?.rol})
       </h1>
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white shadow rounded p-4">
-          <h2 className="text-gray-600">Total de productos</h2>
-          <p className="text-3xl font-bold text-blue-600">{total}</p>
-        </div>
-        <div className="bg-white shadow rounded p-4">
-          <h2 className="text-gray-600">En oferta (menos de $20)</h2>
-          <p className="text-3xl font-bold text-red-500">{enOferta}</p>
-        </div>
-        <div className="bg-white shadow rounded p-4">
-          <h2 className="text-gray-600">Stock total acumulado</h2>
-          <p className="text-3xl font-bold text-green-600">{stockTotal}</p>
-        </div>
+        <EstadisticaCard
+          titulo="Total de productos"
+          valor={total}
+          icono={<Boxes />}
+        />
+        <EstadisticaCard
+          titulo="En oferta (menos de $20)"
+          valor={enOferta}
+          color="text-red-500"
+          icono={<PercentCircle />}
+        />
+        <EstadisticaCard
+          titulo="Stock total acumulado"
+          valor={stockTotal}
+          color="text-green-600"
+          icono={<Layers />}
+        />
       </section>
+
 
       <section className="mt-6">
         <h2 className="text-lg font-semibold mb-2 text-yellow-700">
