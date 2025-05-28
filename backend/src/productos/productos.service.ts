@@ -14,6 +14,33 @@ export class ProductosService {
   findAll(): Promise<Producto[]> {
     return this.prisma.producto.findMany();
   }
+  async buscarConFiltros(q = '', page?: number, limit?: number): Promise<[Producto[], number]> {
+    const donde = q
+      ? {
+          nombre: {
+            contains: q,
+          },
+        }
+      : {};
+
+    const options: any = {
+      where: donde,
+      orderBy: { id: 'asc' },
+    };
+
+    if (limit !== undefined && page !== undefined) {
+      options.skip = (page - 1) * limit;
+      options.take = limit;
+    }
+
+    const [productos, total] = await Promise.all([
+      this.prisma.producto.findMany(options),
+      this.prisma.producto.count({ where: donde }),
+    ]);
+
+    return [productos, total];
+  }
+
 
   async create(data: Omit<Producto, 'id'>): Promise<Producto> {
     // Validación previa

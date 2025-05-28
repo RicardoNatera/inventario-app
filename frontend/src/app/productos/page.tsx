@@ -8,6 +8,8 @@ import { editarProducto } from "@/lib/api";
 import { Producto } from "@/interfaces/producto";
 import { useRouter } from "next/navigation";
 import { getUsuarioDesdeToken } from "@/lib/auth";
+import debounce from "lodash.debounce";
+import { useCallback } from "react";
 
 export default function ProductosPage() {
   const router = useRouter();
@@ -18,10 +20,19 @@ export default function ProductosPage() {
 
   const usuario = getUsuarioDesdeToken();
   const esAdmin = usuario?.rol === "ADMIN";
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
 
-  
+  const actualizarBusqueda = useCallback(
+    debounce((texto: string) => {
+      setPage(1);       // resetear a primera página
+      setQ(texto);      // actualiza el término de búsqueda
+    }, 100), // milisegundos
+    []
+  );
+
   useEffect(() => {
-
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -30,16 +41,18 @@ export default function ProductosPage() {
 
     const fetchProductos = async () => {
       try {
-        const { data } = await obtenerProductos();
-        setProductos(data);
+        const res = await obtenerProductos(q, page, 5); // usamos los nuevos params
+        setProductos(res.data);
+        setTotalPaginas(res.totalPages);
       } catch (error) {
         console.error("Error al cargar productos:", error);
         alert("Error al cargar productos.");
       }
     };
 
+
     fetchProductos();
-  }, [router]);
+  }, [router,q,page]);
 
   // Estados para crear nuevo producto
   const [nuevo, setNuevo] = useState({ nombre: "", precio: 0, stock: 0 });
@@ -129,10 +142,11 @@ export default function ProductosPage() {
       <div className="flex flex-col md:flex-row gap-4">
         <input
           type="text"
-          placeholder="Buscar por nombre..."
-          value={filtro}
-          onChange={e => setFiltro(e.target.value)}
-          className="border px-4 py-2 rounded md:w-1/2"
+          placeholder="Buscar productos..."
+          className="border px-3 py-2 mb-4 rounded w-full md:w-1/3"
+          value={q}
+          onChange={(e) => actualizarBusqueda(e.target.value)}
+
         />
         <button
           onClick={toggleOrden}
@@ -189,6 +203,7 @@ export default function ProductosPage() {
         </form>
 
       )}
+      
 
       {/* Tabla */}
       <table className="w-full border-collapse mt-4">
@@ -226,6 +241,19 @@ export default function ProductosPage() {
           ))}
         </tbody>
       </table>
+      <div className="flex gap-2 justify-center mt-4">
+        {Array.from({ length: totalPaginas }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setPage(i + 1)}
+            className={`px-3 py-1 rounded border ${
+              page === i + 1 ? "bg-blue-600 text-white" : "bg-white"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
 
       {/* Formulario Edición */}
       {editandoId !== null && (

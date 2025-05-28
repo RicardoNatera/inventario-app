@@ -10,6 +10,7 @@ export const api = axios.create({
 
 // Interceptor: agrega Authorization si hay token
 api.interceptors.request.use((config) => {
+
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
     if (token) {
@@ -20,7 +21,17 @@ api.interceptors.request.use((config) => {
 });
 
 // Métodos de productos
-export const obtenerProductos = () => api.get<Producto[]>("/productos");
+export async function obtenerProductos(q = '', page = 1, limit = 10) {
+  const res = await api.get("/productos", {
+    params: { q, page, limit },
+  });
+
+  return res.data;
+}
+export async function obtenerTodosLosProductos() {
+  const res = await api.get("/productos"); // sin query params
+  return res.data;
+}
 export const crearProducto = (producto: Omit<Producto, "id">) =>
   api.post<Producto>("/productos", producto);
 export const editarProducto = (id: number, data: Partial<Omit<Producto, "id">>) =>

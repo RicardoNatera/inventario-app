@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, UseGuards, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ProductosService } from './productos.service';
 import { Producto } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -9,9 +9,26 @@ export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
 
   @Get()
-  findAll(): Promise<Producto[]> {
-    return this.productosService.findAll();
+  async findAll(
+    @Query('q') q?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pag = page ? parseInt(page) : undefined;
+    const lim = limit ? parseInt(limit) : undefined;
+
+    const [productos, total] = await this.productosService.buscarConFiltros(q, pag, lim);
+    const totalPages = lim ? Math.ceil(total / lim) : 1;
+
+    return {
+      data: productos,
+      total,
+      page: pag ?? 1,
+      limit: lim ?? total,
+      totalPages    
+    };
   }
+
 
   @Post()
   create(@Body() data: Omit<Producto, 'id'>): Promise<Producto> {

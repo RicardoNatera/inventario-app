@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { obtenerProductos } from "@/lib/api";
+import { obtenerTodosLosProductos } from "@/lib/api";
 import { Producto } from "@/interfaces/producto";
 import { getUsuarioDesdeToken } from "@/lib/auth";
 import {
@@ -26,7 +26,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await obtenerProductos();
+      const { data } = await obtenerTodosLosProductos();
       setProductos(data);
     };
     fetch();
