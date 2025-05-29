@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { getUsuarioDesdeToken } from "@/lib/auth";
 import debounce from "lodash.debounce";
 import { useCallback } from "react";
+import { api } from "@/lib/api";
 
 export default function ProductosPage() {
   const router = useRouter();
@@ -31,6 +32,24 @@ export default function ProductosPage() {
     }, 100), // milisegundos
     []
   );
+  const descargarArchivo = async (tipo: "excel" | "pdf") => {
+    try {
+      const res = await api.get(`/productos/${tipo}`, {
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `productos.${tipo === "excel" ? "xlsx" : "pdf"}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert(`Error al descargar el archivo ${tipo.toUpperCase()}`);
+    }
+  };
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -163,6 +182,21 @@ export default function ProductosPage() {
         >
           {mostrarFormCrear ? "Cancelar creación" : "Agregar producto"}
         </button>)}
+        <div className="flex gap-4 mb-4">
+          <button
+            onClick={() => descargarArchivo("excel")}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            📤 Exportar a Excel
+          </button>
+          <button
+            onClick={() => descargarArchivo("pdf")}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            🧾 Exportar a PDF
+          </button>
+        </div>
+
       </div>
 
       {/* Formulario Crear */}
