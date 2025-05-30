@@ -24,6 +24,9 @@ export default function ProductosPage() {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  const [minPrecio, setMinPrecio] = useState('');
+  const [maxPrecio, setMaxPrecio] = useState('');
+  const [stockMenorA, setStockMenorA] = useState('');
 
   const actualizarBusqueda = useCallback(
     debounce((texto: string) => {
@@ -34,7 +37,14 @@ export default function ProductosPage() {
   );
   const descargarArchivo = async (tipo: "excel" | "pdf") => {
     try {
+      const params: any = {};
+      if (q) params.q = q;
+      if (minPrecio) params.minPrecio = minPrecio;
+      if (maxPrecio) params.maxPrecio = maxPrecio;
+      if (stockMenorA) params.stockMenorA = stockMenorA;
+
       const res = await api.get(`/productos/${tipo}`, {
+        params,
         responseType: "blob",
       });
 
@@ -46,9 +56,10 @@ export default function ProductosPage() {
       link.click();
       link.remove();
     } catch (error) {
-      alert(`Error al descargar el archivo ${tipo.toUpperCase()}`);
+      alert(`Error al descargar archivo ${tipo.toUpperCase()}`);
     }
   };
+
 
 
   useEffect(() => {
@@ -60,7 +71,14 @@ export default function ProductosPage() {
 
     const fetchProductos = async () => {
       try {
-        const res = await obtenerProductos(q, page, 5); // usamos los nuevos params
+        const res = await obtenerProductos(
+          q,
+          page,
+          5,
+          minPrecio,
+          maxPrecio,
+          stockMenorA
+        );        
         setProductos(res.data);
         setTotalPaginas(res.totalPages);
       } catch (error) {
@@ -69,9 +87,8 @@ export default function ProductosPage() {
       }
     };
 
-
     fetchProductos();
-  }, [router,q,page]);
+  }, [router,q,page,minPrecio,maxPrecio,stockMenorA]);
 
   // Estados para crear nuevo producto
   const [nuevo, setNuevo] = useState({ nombre: "", precio: 0, stock: 0 });
@@ -182,6 +199,39 @@ export default function ProductosPage() {
         >
           {mostrarFormCrear ? "Cancelar creación" : "Agregar producto"}
         </button>)}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <input
+            type="number"
+            placeholder="Precio mínimo"
+            value={minPrecio}
+            onChange={(e) => {
+              setPage(1);
+              setMinPrecio(e.target.value);
+            }}
+            className="border px-2 py-1 rounded"
+          />
+          <input
+            type="number"
+            placeholder="Precio máximo"
+            value={maxPrecio}
+            onChange={(e) => {
+              setPage(1);
+              setMaxPrecio(e.target.value);
+            }}
+            className="border px-2 py-1 rounded"
+          />
+          <input
+            type="number"
+            placeholder="Stock menor a..."
+            value={stockMenorA}
+            onChange={(e) => {
+              setPage(1);
+              setStockMenorA(e.target.value);
+            }}
+            className="border px-2 py-1 rounded"
+          />
+        </div>
+
         <div className="flex gap-4 mb-4">
           <button
             onClick={() => descargarArchivo("excel")}

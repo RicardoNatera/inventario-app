@@ -13,8 +13,18 @@ export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
   
   @Get('pdf')
-  async exportarPDF(@Res() res: Response) {
-    const productos = await this.productosService.findAll();
+  async exportarPDF(
+    @Res() res: Response,
+    @Query('q') q?: string,
+    @Query('minPrecio') minPrecio?: string,
+    @Query('maxPrecio') maxPrecio?: string,
+    @Query('stockMenorA') stockMenorA?: string,
+  ) {
+    const min = minPrecio ? parseFloat(minPrecio) : undefined;
+    const max = maxPrecio ? parseFloat(maxPrecio) : undefined;
+    const stock = stockMenorA ? parseInt(stockMenorA) : undefined;
+
+    const [productos] = await this.productosService.buscarConFiltros(q, undefined, undefined, min, max, stock);
 
     const doc = new PDFDocument({ margin: 30, size: 'A4' });
 
@@ -55,8 +65,18 @@ export class ProductosController {
   }
 
   @Get('excel')
-  async exportarExcel(@Res() res: Response) {
-    const productos = await this.productosService.findAll();
+  async exportarExcel(
+    @Res() res: Response,
+    @Query('q') q?: string,
+    @Query('minPrecio') minPrecio?: string,
+    @Query('maxPrecio') maxPrecio?: string,
+    @Query('stockMenorA') stockMenorA?: string,
+  ) {
+    const min = minPrecio ? parseFloat(minPrecio) : undefined;
+    const max = maxPrecio ? parseFloat(maxPrecio) : undefined;
+    const stock = stockMenorA ? parseInt(stockMenorA) : undefined;
+
+    const [productos] = await this.productosService.buscarConFiltros(q, undefined, undefined, min, max, stock);
 
     const workbook = new ExcelJS.Workbook();
     const hoja = workbook.addWorksheet('Productos');
@@ -84,11 +104,17 @@ export class ProductosController {
     @Query('q') q?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('minPrecio') minPrecio?: string,
+    @Query('maxPrecio') maxPrecio?: string,
+    @Query('stockMenorA') stockMenorA?: string,
   ) {
     const pag = page ? parseInt(page) : undefined;
     const lim = limit ? parseInt(limit) : undefined;
-
-    const [productos, total] = await this.productosService.buscarConFiltros(q, pag, lim);
+    const min = minPrecio ? parseFloat(minPrecio) : undefined;
+    const max = maxPrecio ? parseFloat(maxPrecio) : undefined;
+    const stock = stockMenorA ? parseInt(stockMenorA) : undefined;
+    
+    const [productos, total] = await this.productosService.buscarConFiltros(q, pag, lim, min, max, stock);
     const totalPages = lim ? Math.ceil(total / lim) : 1;
 
     return {

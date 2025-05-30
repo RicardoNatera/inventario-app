@@ -21,11 +21,20 @@ api.interceptors.request.use((config) => {
 });
 
 // Métodos de productos
-export async function obtenerProductos(q = '', page = 1, limit = 10) {
-  const res = await api.get("/productos", {
-    params: { q, page, limit },
-  });
+export async function obtenerProductos(
+  q = '',
+  page = 1,
+  limit = 10,
+  minPrecio?: string,
+  maxPrecio?: string,
+  stockMenorA?: string
+) {
+  const params: any = { q, page, limit };
+  if (minPrecio) params.minPrecio = minPrecio;
+  if (maxPrecio) params.maxPrecio = maxPrecio;
+  if (stockMenorA) params.stockMenorA = stockMenorA;
 
+  const res = await api.get("/productos", { params });
   return res.data;
 }
 export async function obtenerTodosLosProductos() {
