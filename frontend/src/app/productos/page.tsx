@@ -20,7 +20,7 @@ export default function ProductosPage() {
   const [productos, setProductos] = useState<Producto[]>([]);
 
   const usuario = getUsuarioDesdeToken();
-  const esAdmin = usuario?.rol === "ADMIN";
+  const [rol, setRol] = useState("USER");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
@@ -64,6 +64,10 @@ export default function ProductosPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+      if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setRol(payload.rol);
+    }
     if (!token) {
       router.push("/login");
       return;
@@ -190,7 +194,7 @@ export default function ProductosPage() {
         >
           Ordenar por precio ({ordenAscendente ? "Asc" : "Desc"})
         </button>
-        {esAdmin && (<button
+        {rol === 'ADMIN' && (<button
           onClick={() => {
             setMostrarFormCrear(!mostrarFormCrear);
             setEditandoId(null);
@@ -232,6 +236,7 @@ export default function ProductosPage() {
           />
         </div>
 
+        { rol === 'ADMIN' && (
         <div className="flex gap-4 mb-4">
           <button
             onClick={() => descargarArchivo("excel")}
@@ -246,6 +251,7 @@ export default function ProductosPage() {
             🧾 Exportar a PDF
           </button>
         </div>
+        )}
 
       </div>
 
@@ -296,7 +302,7 @@ export default function ProductosPage() {
             <th className="px-4 py-2">Nombre</th>
             <th className="px-4 py-2">Precio</th>
             <th className="px-4 py-2">Stock</th>
-            {esAdmin && (<><th className="px-4 py-2">Acciones</th></>)}
+            {rol === 'ADMIN' && (<><th className="px-4 py-2">Acciones</th></>)}
           </tr>
         </thead>
         <tbody>
@@ -305,7 +311,7 @@ export default function ProductosPage() {
               <td className="px-4 py-2">{p.nombre}</td>
               <td className="px-4 py-2">${p.precio}</td>
               <td className="px-4 py-2">{p.stock}</td>
-              {esAdmin && (<><td className="px-4 py-2 space-x-2">
+              {rol === 'ADMIN' && (<><td className="px-4 py-2 space-x-2">
                 
                 <button
                   onClick={() => iniciarEdicion(p)}

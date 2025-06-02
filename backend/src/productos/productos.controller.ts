@@ -6,6 +6,8 @@ import { Response } from 'express';
 import * as ExcelJS from 'exceljs';
 import * as PDFDocument from 'pdfkit';
 import { Res } from '@nestjs/common';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('productos')
@@ -126,12 +128,15 @@ export class ProductosController {
     };
   }
 
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Post()
   create(@Body() data: Omit<Producto, 'id'>): Promise<Producto> {
     return this.productosService.create(data);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -139,7 +144,9 @@ export class ProductosController {
   ): Promise<Producto> {
     return this.productosService.update(id, data);
   }
-
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @Delete(':id')
   delete(@Param('id', ParseIntPipe) id: number): Promise<Producto> {
     return this.productosService.delete(id);
