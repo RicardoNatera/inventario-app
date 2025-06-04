@@ -9,6 +9,8 @@ import {
   eliminarProducto,
   api,
 } from "@/lib/api";
+import { toast } from "react-toastify";
+import { showConfirmModal } from "@/components/ui/ConfirmModal";
 import { Producto } from "@/interfaces/producto";
 import FiltrosProductos from "@/components/productos/FiltrosProductos";
 import TablaProductos from "@/components/productos/TablaProductos";
@@ -80,7 +82,7 @@ const toggleOrden = () => {
       link.click();
       link.remove();
     } catch (error) {
-      alert(`Error al descargar archivo ${tipo.toUpperCase()}`);
+      toast.error(`Error al descargar archivo ${tipo.toUpperCase()}`);
     }
   };
 
@@ -91,13 +93,13 @@ const toggleOrden = () => {
       setProductos([creado, ...productos]);
       setNuevo({ nombre: "", precio: 0, stock: 0 });
       setMostrarFormCrear(false);
-      alert("✅ Producto creado con éxito");
+      toast.success("✅ Producto creado con éxito");
     } catch (error: any) {
       if (error.response?.status === 400) {
-        alert("⚠️ " + error.response.data.message);
+        toast.warn("⚠️ " + error.response.data.message);
       } else {
         console.error(error);
-        alert("❌ Error al crear producto.");
+        toast.error("❌ Error al crear producto.");
       }
     }
   };
@@ -115,27 +117,34 @@ const toggleOrden = () => {
         productos.map((p) => (p.id === editandoId ? actualizado : p))
       );
       setEditandoId(null);
-      alert("✏️ Producto actualizado con éxito");
+      toast.success("✏️ Producto actualizado con éxito");
     } catch (error: any) {
       if (error.response?.status === 400) {
-        alert("⚠️ " + error.response.data.message);
+        toast.warn("⚠️ " + error.response.data.message);
       } else {
         console.error(error);
-        alert("❌ Error al editar producto");
+        toast.error("❌ Error al editar producto");
       }
     }
   };
 
   const handleEliminar = async (id: number) => {
-    if (!confirm("¿Estás seguro de eliminar este producto?")) return;
-    try {
-      await eliminarProducto(id);
-      setProductos(productos.filter((p) => p.id !== id));
-      alert("🗑️ Producto eliminado con éxito");
-    } catch (error) {
-      console.error(error);
-      alert("❌ Error al eliminar el producto");
-    }
+    showConfirmModal({
+        title: "¿Eliminar producto?",
+        message: "¿Deseas eliminar este producto permanentemente?",
+        confirmText: "Sí, eliminar",
+        cancelText: "Cancelar",
+        onConfirm:  async () => {
+          try {
+            await eliminarProducto(id);
+            setProductos(productos.filter((p) => p.id !== id));
+            toast.success("🗑️ Producto eliminado con éxito");
+          } catch (error) {
+            console.error(error);
+            toast.error("❌ Error al eliminar el producto");
+          }
+        },
+    });    
   };
 
   useEffect(() => {
@@ -160,9 +169,11 @@ const toggleOrden = () => {
         );
         setProductos(res.data);
         setTotalPaginas(res.totalPages);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
       } catch (error) {
         console.error("Error al cargar productos:", error);
-        alert("Error al cargar productos.");
+        toast.error("Error al cargar productos.");
       }
     };
 
@@ -259,17 +270,25 @@ const toggleOrden = () => {
       />
 
       <div className="flex gap-2 justify-center mt-4">
-        {Array.from({ length: totalPaginas }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => setPage(i + 1)}
-            className={`px-3 py-1 rounded border ${
-              page === i + 1 ? "bg-blue-600 text-white" : "bg-white"
-            }`}
-          >
-            {i + 1}
-          </button>
-        ))}
+        {Array.from({ length: totalPaginas }, (_, i) => {
+          const pagina = i + 1;
+          const activa = pagina === page;
+
+          return (
+            <button
+              key={pagina}
+              onClick={() => !activa && setPage(pagina)}
+              disabled={activa}
+              className={`px-3 py-1 rounded border ${
+                activa
+                  ? "bg-blue-600 text-white cursor-default"
+                  : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              {pagina}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -32,7 +32,17 @@ export default function TablaProductos({
         {productos.map((p) => (
           <tr key={p.id} className="text-center">
             <td className="py-2 px-4 border-b">{p.nombre}</td>
-            <td className="py-2 px-4 border-b">${p.precio.toFixed(2)}</td>
+            <td className="px-4 py-2 border-b">
+              ${p.precio.toFixed(2)}
+              {p.precio < 20 && (
+                <span
+                  title="Este producto cuesta menos de $20"
+                  className="ml-2 inline-block bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full cursor-help"
+                >
+                  🔥 Oferta
+                </span>
+              )}
+            </td>
             <td className="py-2 px-4 border-b">{p.stock}</td>
             {rol === "ADMIN" && (
               <td className="py-2 px-4 border-b space-x-2">
