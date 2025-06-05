@@ -40,13 +40,15 @@ export default function ProductosPage() {
     stock: 0,
   });
 
-const toggleOrden = () => {
-  const ordenados = [...productos].sort((a, b) =>
-    ordenAscendente ? a.precio - b.precio : b.precio - a.precio
-  );
-  setProductos(ordenados);
-  setOrdenAscendente(!ordenAscendente);
-};
+  const [errores, setErrores] = useState<{ nombre?: string; precio?: string; stock?: string }>({});
+
+  const toggleOrden = () => {
+    const ordenados = [...productos].sort((a, b) =>
+      ordenAscendente ? a.precio - b.precio : b.precio - a.precio
+    );
+    setProductos(ordenados);
+    setOrdenAscendente(!ordenAscendente);
+  };
 
   const iniciarEdicion = (producto: Producto) => {
     setEditandoId(producto.id);
@@ -88,6 +90,22 @@ const toggleOrden = () => {
 
   const handleCrear = async (e: React.FormEvent) => {
     e.preventDefault();
+    const nuevosErrores: typeof errores = {};
+    if (!nuevo.nombre.trim()) {
+      nuevosErrores.nombre = "El nombre es obligatorio";
+    }
+    if (nuevo.precio <= 0) {
+      nuevosErrores.precio = "El precio debe ser mayor a 0";
+    }
+    if (nuevo.stock < 0) {
+      nuevosErrores.stock = "El stock no puede ser negativo";
+    }
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErrores(nuevosErrores);
+      return;
+    }
+
     try {
       const { data: creado } = await crearProducto(nuevo);
       setProductos([creado, ...productos]);
@@ -107,6 +125,23 @@ const toggleOrden = () => {
   const handleEditar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editandoId === null) return;
+    
+    const edicionErrores: typeof errores = {};
+    if (!datosEdicion.nombre.trim()) {
+      edicionErrores.nombre = "El nombre es obligatorio";
+    }
+    if (datosEdicion.precio <= 0) {
+      console.log("aaaaa")
+      edicionErrores.precio = "El precio debe ser mayor a 0";
+    }
+    if (datosEdicion.stock < 0) {
+      edicionErrores.stock = "El stock no puede ser negativo";
+    }
+
+    if (Object.keys(edicionErrores).length > 0) {
+      setErrores(edicionErrores);
+      return;
+    }
 
     try {
       const { data: actualizado } = await editarProducto(
@@ -234,7 +269,6 @@ const toggleOrden = () => {
           </div>
         )}
       </div>
-
       {mostrarFormCrear && !editandoId && (
         <FormularioProducto
           datos={nuevo}
@@ -244,7 +278,9 @@ const toggleOrden = () => {
           cancelarEdicion={() => {
             setMostrarFormCrear(false);
             setNuevo({ nombre: "", precio: 0, stock: 0 });
+            setErrores({});
           }}
+          errores={errores}
         />
         
       )}
@@ -258,7 +294,9 @@ const toggleOrden = () => {
           cancelarEdicion={() => {
             setEditandoId(null);
             setDatosEdicion({ nombre: "", precio: 0, stock: 0 });
+            setErrores({});
           }}
+          errores={errores}
         />
       )}
 
