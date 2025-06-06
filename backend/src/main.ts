@@ -6,6 +6,7 @@ async function bootstrap() {
   // Habilitar CORS para permitir llamadas desde el frontend
   app.enableCors({
     origin: '*',
+    credentials: true,
   });
   await app.listen(process.env.PORT ?? 3001);
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
+import { baseURL } from "@/lib/api";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -16,7 +17,7 @@ export default function LoginForm() {
     setError("");
 
     try {
-      const { data } = await axios.post("http://localhost:3001/auth/login", {
+      const { data } = await axios.post(`${baseURL}/auth/login`, {
         email,
         password,
       });

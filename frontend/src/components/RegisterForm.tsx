@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { baseURL } from "@/lib/api";
 
 export default function RegisterForm() {
   const [nombre, setNombre] = useState("");
@@ -17,7 +18,7 @@ export default function RegisterForm() {
     setError("");
 
     try {
-      const { data } = await axios.post("http://localhost:3001/auth/register", {
+      const { data } = await axios.post(`${baseURL}/auth/register`, {
         nombre,
         email,
         password,
