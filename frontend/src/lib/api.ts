@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Producto } from "@/interfaces/producto";
 
-export const baseURL="https://dashboard-backend-g04s.onrender.com"
+export const baseURL="http://localhost:3001"
 
 export const api = axios.create({
   baseURL: baseURL,
