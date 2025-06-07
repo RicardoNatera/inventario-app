@@ -1,6 +1,6 @@
 # 📦 Dashboard de Productos – Inventario App
 
-Sistema de gestión de productos con login, roles (admin/usuario), exportación de datos, filtros avanzados y visualización. Proyecto completo con frontend + backend + base de datos.
+Sistema de gestión de productos con login, roles (admin/usuario), exportación de datos, filtros avanzados y visualización. Proyecto completo con frontend + backend + base de datos. 100% funcional en local.
 
 ## 🚀 Tecnologías utilizadas
 
@@ -75,9 +75,12 @@ npm install
 ```bash
 cd ../backend
 npm install
+cp .env.example .env
+npx prisma db push
 npx prisma generate
 npx prisma migrate dev
 ```
+Esto creará la base de datos `dev.db`
 
 ### 🔹 Iniciar el proyecto (frontend + backend)
 
@@ -107,6 +110,26 @@ Esto ejecutará:
 - Los usuarios `USER` pueden:
   - Visualizar y filtrar productos
   - Acceder a productos en oferta
+
+## 🧪 Variables de entorno
+
+Consulta `/backend/.env.example` para ver las necesarias.
+
+---
+
+## 🛡 Seguridad
+
+- Las variables sensibles (`JWT_SECRET`, `DATABASE_URL`) están en `.env`
+- El frontend se conecta al backend usando `axios` con token en `localStorage`
+
+---
+
+## 🛠 Estado actual
+
+✅ Totalmente funcional en local  
+🚫 Despliegue en la nube no configurado
+
+---
 
 ## 📄 Licencia
 
